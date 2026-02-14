@@ -1,0 +1,80 @@
+import { z } from "zod";
+
+export const channelSchema = z.enum(["sms", "email", "imessage", "whatsapp", "voice"]);
+
+export const actionNameSchema = z.enum([
+  "person.find",
+  "person.upsert",
+  "person.tag.add",
+  "person.tag.remove",
+  "note.create",
+  "task.create",
+  "task.complete",
+  "message.send",
+  "message.logToFUB",
+  "listing.search",
+  "listing.get",
+  "summary.generate"
+]);
+
+const auditSchema = z.object({
+  source: z.string().default("OpenClawScreenless"),
+  correlationId: z.string(),
+  actor: z.string().default("system"),
+  requestedAt: z.string().datetime()
+});
+
+const personRefSchema = z.object({
+  personId: z.number().optional(),
+  email: z.string().email().optional(),
+  phone: z.string().min(5).optional(),
+  name: z.string().min(1).optional()
+}).refine((v) => Boolean(v.personId || v.email || v.phone || v.name), "person reference required");
+
+export const actionInputSchema = z.discriminatedUnion("action", [
+  z.object({ action: z.literal("person.find"), query: z.string().min(1) }),
+  z.object({ action: z.literal("person.upsert"), person: personRefSchema.extend({ tags: z.array(z.string()).optional(), stage: z.string().optional(), customFields: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).optional() }) }),
+  z.object({ action: z.literal("person.tag.add"), person: personRefSchema, tag: z.string().min(1) }),
+  z.object({ action: z.literal("person.tag.remove"), person: personRefSchema, tag: z.string().min(1) }),
+  z.object({ action: z.literal("note.create"), person: personRefSchema, text: z.string().min(1) }),
+  z.object({ action: z.literal("task.create"), person: personRefSchema, title: z.string().min(1), dueAt: z.string().optional(), description: z.string().optional() }),
+  z.object({ action: z.literal("task.complete"), taskId: z.number() }),
+  z.object({ action: z.literal("message.send"), channel: channelSchema, to: z.string().min(3), body: z.string().min(1), subject: z.string().optional(), from: z.string().optional(), person: personRefSchema.optional(), logToFub: z.boolean().default(true) }),
+  z.object({ action: z.literal("message.logToFUB"), channel: channelSchema, to: z.string(), body: z.string(), person: personRefSchema, providerMessageId: z.string().optional(), sentAt: z.string().datetime().optional() }),
+  z.object({ action: z.literal("listing.search"), query: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])) }),
+  z.object({ action: z.literal("listing.get"), mlsId: z.string().optional(), address: z.string().optional() }).refine((v) => Boolean(v.mlsId || v.address), "mlsId or address required"),
+  z.object({ action: z.literal("summary.generate"), topic: z.string(), data: z.any() })
+]);
+
+export const roleSchema = z.enum(["operator", "assistant", "automation", "readonly"]);
+
+export const actionRequestSchema = z.object({
+  idempotencyKey: z.string().min(8),
+  permissionScope: z.string().min(1),
+  dryRun: z.boolean().default(true),
+  confirm: z.boolean().default(false),
+  verbose: z.boolean().default(false),
+  role: roleSchema.default("assistant"),
+  audit: auditSchema,
+  input: actionInputSchema
+});
+
+export type ActionRequest = z.infer<typeof actionRequestSchema>;
+export type ActionInput = z.infer<typeof actionInputSchema>;
+export type ActionName = z.infer<typeof actionNameSchema>;
+export type Channel = z.infer<typeof channelSchema>;
+export type Role = z.infer<typeof roleSchema>;
+
+export type ActionResult<T = unknown> = {
+  ok: boolean;
+  dryRun: boolean;
+  correlationId: string;
+  action: ActionName;
+  redacted: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    retryable: boolean;
+  };
+};

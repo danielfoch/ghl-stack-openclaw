@@ -1,9 +1,8 @@
-.DS_Store
-.env
 node_modules
 dist
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
+.env
+.env.local
+coverage
+*.db
+*.sqlite
+.DS_Store
