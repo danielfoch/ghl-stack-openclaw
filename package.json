@@ -9,10 +9,11 @@
   "scripts": {
     "build": "npm run build:core && npm run build:adapters && npm run build:runtimes",
     "build:core": "npm --workspace @fub/core run build",
-    "build:adapters": "npm --workspace @fub/adapters-fub run build && npm --workspace @fub/adapters-idx run build && npm --workspace @fub/adapters-sendhub run build && npm --workspace @fub/adapters-email run build && npm --workspace @fub/adapters-elevenlabs run build && npm --workspace @fub/adapters-slybroadcast run build",
-    "build:runtimes": "npm --workspace @fub/cli run build && npm --workspace @fub/mcp-server run build && npm --workspace @fub/webhooks run build",
+    "build:adapters": "npm --workspace @fub/adapters-fub run build && npm --workspace @fub/adapters-idx run build && npm --workspace @fub/adapters-sendhub run build && npm --workspace @fub/adapters-email run build && npm --workspace @fub/adapters-elevenlabs run build && npm --workspace @fub/adapters-slybroadcast run build && npm --workspace @fub/adapters-kvcore run build",
+    "build:runtimes": "npm --workspace @fub/cli run build && npm --workspace @fub/mcp-server run build && npm --workspace @fub/webhooks run build && npm --workspace @fub/kvcore-cli run build && npm --workspace @fub/kvcore-mcp-server run build",
     "clean": "rm -rf packages/*/dist coverage",
     "dev:mcp": "npm --workspace @fub/mcp-server run dev",
+    "dev:kvcore-mcp": "npm --workspace @fub/kvcore-mcp-server run dev",
     "dev:webhooks": "npm --workspace @fub/webhooks run dev",
     "test": "npm --workspace @fub/core run test",
     "lint": "npm run build",
