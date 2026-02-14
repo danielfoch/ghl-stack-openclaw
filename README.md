@@ -205,3 +205,13 @@ It executes:
 - IDX adapter is vendor-pluggable.
 - iMessage/wacli flows are supported as outbound-only transport boundaries.
 - Logging back into FUB is automatic after successful outbound send when a person can be resolved.
+
+## SkySlope Deal Manager (New)
+
+A new package is available at `packages/skyslope-deal-manager` for transaction/deal office workflows:
+
+- CLI runtime: `npm run dev:skyslope-cli -- <command>`
+- MCP server runtime: `npm run dev:skyslope-mcp`
+- Build package: `npm run build:skyslope`
+
+See `packages/skyslope-deal-manager/README.md` for commands and env variables.

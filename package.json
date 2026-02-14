@@ -15,6 +15,9 @@
     "dev:mcp": "npm --workspace @fub/mcp-server run dev",
     "dev:kvcore-mcp": "npm --workspace @fub/kvcore-mcp-server run dev",
     "dev:webhooks": "npm --workspace @fub/webhooks run dev",
+    "build:skyslope": "npm --workspace @fub/skyslope-deal-manager run build",
+    "dev:skyslope-cli": "npm --workspace @fub/skyslope-deal-manager run dev:cli --",
+    "dev:skyslope-mcp": "npm --workspace @fub/skyslope-deal-manager run dev:mcp",
     "test": "npm --workspace @fub/core run test",
     "lint": "npm run build",
     "demo": "tsx scripts/demo.ts"

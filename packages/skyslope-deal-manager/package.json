@@ -1,0 +1,29 @@
+{
+  "name": "@fub/skyslope-deal-manager",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "skyslope-deal": "dist/cli.js",
+    "skyslope-mcp": "dist/mcp-server.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev:cli": "tsx src/cli.ts",
+    "dev:mcp": "tsx src/mcp-server.ts",
+    "test": "echo 'no tests yet'"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.4",
+    "better-sqlite3": "^11.8.1",
+    "commander": "^12.1.0",
+    "pdf-parse": "^1.1.1",
+    "pdf-lib": "^1.17.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  }
+}
