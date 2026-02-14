@@ -11,6 +11,7 @@ import type {
   IdxAdapter,
   OutboundOnlyTransport,
   SmsAdapter,
+  SlybroadcastAdapter,
   VoiceAdapter
 } from "../types/adapters.js";
 import { resolveOrUpsertPerson, resolvePerson, type PersonRef } from "./resolver.js";
@@ -21,6 +22,7 @@ export type EngineDeps = {
   fub: FubAdapter;
   idx: IdxAdapter;
   sms: SmsAdapter;
+  slybroadcast?: SlybroadcastAdapter;
   email?: EmailAdapter;
   voice?: VoiceAdapter;
   outboundOnly?: OutboundOnlyTransport;
@@ -164,6 +166,40 @@ export class ActionEngine {
           input.sentAt ?? new Date().toISOString()
         );
         return ok(request, { personId: person.id, channel: input.channel });
+      }
+      case "voicemail.drop": {
+        if (!this.deps.slybroadcast) throw new ValidationError("slybroadcast adapter not configured");
+        if (!execute) {
+          return ok(request, {
+            would: "voicemail.drop",
+            phoneNumbers: input.phoneNumbers,
+            audio: input.audio,
+            campaignName: input.campaignName
+          });
+        }
+        const campaign = await this.deps.slybroadcast.createCampaign({
+          phoneNumbers: input.phoneNumbers,
+          audio: input.audio,
+          campaignName: input.campaignName,
+          callerId: input.callerId,
+          sendDate: input.sendDate,
+          sendTime: input.sendTime,
+          timezone: input.timezone,
+          repeatDays: input.repeatDays
+        });
+        return ok(request, campaign);
+      }
+      case "voicemail.audio.list": {
+        if (!this.deps.slybroadcast) throw new ValidationError("slybroadcast adapter not configured");
+        if (!execute) return ok(request, { would: "voicemail.audio.list" });
+        const list = await this.deps.slybroadcast.getAudioList();
+        return ok(request, list);
+      }
+      case "voicemail.campaign.status": {
+        if (!this.deps.slybroadcast) throw new ValidationError("slybroadcast adapter not configured");
+        if (!execute) return ok(request, { would: "voicemail.campaign.status", campaignId: input.campaignId });
+        const status = await this.deps.slybroadcast.getCampaignStatus(input.campaignId);
+        return ok(request, status);
       }
       case "listing.search": {
         const listings = await this.deps.idx.searchListings(input.query);

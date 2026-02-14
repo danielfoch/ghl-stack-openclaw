@@ -10,6 +10,7 @@ MVP-to-production monorepo for hands-free realtor CRM operations using Follow Up
 - `packages/adapters-sendhub`: SendHub SMS sender + webhook verification + mock.
 - `packages/adapters-email`: SMTP/SendGrid/Mailgun/Gmail/GOG email adapters + mock.
 - `packages/adapters-elevenlabs`: optional voice adapter + outbound-only transport adapter boundary.
+- `packages/adapters-slybroadcast`: Slybroadcast voicemail drop adapter + mock.
 - `packages/mcp-server`: MCP server exposing action and workflow tools.
 - `packages/cli`: operator/OpenClaw shell CLI.
 - `packages/webhooks`: inbound instruction gateway (email/SMS/voice).
@@ -62,6 +63,9 @@ npm run dev:mcp
 
 MCP tools:
 - `fub_action`
+- `slybroadcast_drop_voicemail`
+- `slybroadcast_get_audio_list`
+- `slybroadcast_get_campaign_status`
 - `workflow_text_and_task`
 - `workflow_listing_status`
 - `workflow_hotlead_task`
@@ -83,6 +87,10 @@ node packages/cli/dist/index.js task create --person "john@example.com" --title 
 node packages/cli/dist/index.js sms send --to "+14165550001" --body "We got the docs" --person "john@example.com" --confirm --pretty
 node packages/cli/dist/index.js idx search --city Toronto --minBeds 2 --maxPrice 900000 --pretty
 node packages/cli/dist/index.js plan --from-message ./inbound.txt --dry-run --pretty
+node packages/cli/dist/index.js voicemail drop --to "+14165550001,+14165550002" --audio-url "https://example.com/audio.mp3" --campaign-name "Open House Follow-up" --confirm --pretty
+node packages/cli/dist/index.js voicemail drop --to "+14165550001" --elevenlabs-text "Hi, this is a quick update about your showing." --confirm --pretty
+node packages/cli/dist/index.js voicemail audio-list --confirm --pretty
+node packages/cli/dist/index.js voicemail campaign-status --campaign-id 123456 --confirm --pretty
 ```
 
 ## Webhooks (Inbound Instructions)
@@ -110,6 +118,8 @@ Expected controls:
 - SendHub: `SENDHUB_BASE_URL`, `SENDHUB_API_KEY`, `SENDHUB_WEBHOOK_SECRET`
 - Email: `EMAIL_PROVIDER` in `smtp|sendgrid|mailgun|gmail|gog`
 - ElevenLabs optional: `APP_ENABLE_ELEVENLABS=true` + `ELEVENLABS_API_KEY`
+- Slybroadcast optional: `APP_ENABLE_SLYBROADCAST=true` + `SLYBROADCAST_EMAIL` + `SLYBROADCAST_PASSWORD`
+- ElevenLabs for voicemail audio generation: `ELEVENLABS_TTS_VOICE_ID` and `SLYBROADCAST_PUBLIC_AUDIO_BASE_URL` (public URL where generated MP3 files are reachable by Slybroadcast)
 
 ## Command Envelope Examples
 

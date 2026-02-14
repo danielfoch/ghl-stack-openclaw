@@ -12,6 +12,9 @@ export const actionNameSchema = z.enum([
   "task.complete",
   "message.send",
   "message.logToFUB",
+  "voicemail.drop",
+  "voicemail.audio.list",
+  "voicemail.campaign.status",
   "listing.search",
   "listing.get",
   "summary.generate"
@@ -40,6 +43,27 @@ const taskCreate = z.object({ action: z.literal("task.create"), person: personRe
 const taskComplete = z.object({ action: z.literal("task.complete"), taskId: z.number() });
 const messageSend = z.object({ action: z.literal("message.send"), channel: channelSchema, to: z.string().min(3), body: z.string().min(1), subject: z.string().optional(), from: z.string().optional(), person: personRefSchema.optional(), logToFub: z.boolean().default(true) });
 const messageLog = z.object({ action: z.literal("message.logToFUB"), channel: channelSchema, to: z.string(), body: z.string(), person: personRefSchema, providerMessageId: z.string().optional(), sentAt: z.string().datetime().optional() });
+const voicemailDrop = z.object({
+  action: z.literal("voicemail.drop"),
+  phoneNumbers: z.array(z.string().min(5)).min(1),
+  audio: z.object({
+    audioUrl: z.string().url().optional(),
+    slyAudioName: z.string().min(1).optional()
+  }).refine((v) => Boolean(v.audioUrl || v.slyAudioName), "audioUrl or slyAudioName required"),
+  campaignName: z.string().optional(),
+  callerId: z.string().optional(),
+  sendDate: z.string().optional(),
+  sendTime: z.string().optional(),
+  timezone: z.string().optional(),
+  repeatDays: z.array(z.number().int().min(0).max(6)).optional()
+});
+const voicemailAudioList = z.object({
+  action: z.literal("voicemail.audio.list")
+});
+const voicemailCampaignStatus = z.object({
+  action: z.literal("voicemail.campaign.status"),
+  campaignId: z.string().min(1)
+});
 const listingSearch = z.object({ action: z.literal("listing.search"), query: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])) });
 const listingGet = z.object({ action: z.literal("listing.get"), mlsId: z.string().optional(), address: z.string().optional() }).refine((v) => Boolean(v.mlsId || v.address), "mlsId or address required");
 const summaryGenerate = z.object({ action: z.literal("summary.generate"), topic: z.string(), data: z.any() });
@@ -54,6 +78,9 @@ export const actionInputSchema = z.union([
   taskComplete,
   messageSend,
   messageLog,
+  voicemailDrop,
+  voicemailAudioList,
+  voicemailCampaignStatus,
   listingSearch,
   listingGet,
   summaryGenerate

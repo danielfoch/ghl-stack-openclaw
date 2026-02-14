@@ -10,6 +10,16 @@ export function hashContent(value: string): string {
 }
 
 export function enforceSafety(input: ActionInput, config: AppConfig): void {
+  if (input.action === "voicemail.drop") {
+    if (!config.APP_ALLOW_NON_US_CA) {
+      const invalid = input.phoneNumbers.find((phone) => !phone.startsWith("+1"));
+      if (invalid) {
+        throw new ValidationError(`destination outside allowed regions: ${invalid}`);
+      }
+    }
+    return;
+  }
+
   if (input.action !== "message.send") return;
 
   if (SECRET_PATTERN.test(input.body)) {

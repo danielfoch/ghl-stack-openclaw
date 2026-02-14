@@ -21,6 +21,7 @@
     "@fub/adapters-email": "0.1.0",
     "@fub/adapters-elevenlabs": "0.1.0",
     "commander": "^13.1.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "@fub/adapters-slybroadcast": "0.1.0"
   }
 }

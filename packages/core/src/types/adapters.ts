@@ -77,3 +77,30 @@ export interface VoiceAdapter {
 export interface OutboundOnlyTransport {
   send(channel: "imessage" | "whatsapp", message: OutboundMessage): Promise<OutboundResult>;
 }
+
+export type SlybroadcastAudioSource = {
+  audioUrl?: string;
+  slyAudioName?: string;
+};
+
+export type SlybroadcastCampaignRequest = {
+  phoneNumbers: string[];
+  audio: SlybroadcastAudioSource;
+  campaignName?: string;
+  callerId?: string;
+  sendDate?: string;
+  sendTime?: string;
+  timezone?: string;
+  repeatDays?: number[];
+};
+
+export type SlybroadcastCampaignResult = {
+  campaignId: string;
+  raw: unknown;
+};
+
+export interface SlybroadcastAdapter {
+  createCampaign(request: SlybroadcastCampaignRequest): Promise<SlybroadcastCampaignResult>;
+  getAudioList(): Promise<unknown>;
+  getCampaignStatus(campaignId: string): Promise<unknown>;
+}

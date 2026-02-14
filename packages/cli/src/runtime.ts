@@ -12,6 +12,7 @@ import { HttpIdxAdapter, MockIdxAdapter } from "@fub/adapters-idx";
 import { SendHubAdapter, MockSendHubAdapter } from "@fub/adapters-sendhub";
 import { createEmailAdapter, MockEmailAdapter } from "@fub/adapters-email";
 import { ElevenLabsVoiceAdapter, MockOutboundOnlyTransport, MockVoiceAdapter } from "@fub/adapters-elevenlabs";
+import { MockSlybroadcastAdapter, SlybroadcastApiAdapter } from "@fub/adapters-slybroadcast";
 
 export function createEngine(env: NodeJS.ProcessEnv = process.env): { engine: ActionEngine; config: AppConfig } {
   const config = loadConfig(env);
@@ -51,6 +52,14 @@ export function createEngine(env: NodeJS.ProcessEnv = process.env): { engine: Ac
     : new MockVoiceAdapter();
 
   const outboundOnly = new MockOutboundOnlyTransport();
+  const slybroadcast = config.APP_ENABLE_SLYBROADCAST && config.SLYBROADCAST_EMAIL && config.SLYBROADCAST_PASSWORD
+    ? new SlybroadcastApiAdapter({
+        baseUrl: config.SLYBROADCAST_BASE_URL,
+        email: config.SLYBROADCAST_EMAIL,
+        password: config.SLYBROADCAST_PASSWORD,
+        defaultCallerId: config.SLYBROADCAST_DEFAULT_CALLER_ID
+      })
+    : new MockSlybroadcastAdapter();
 
   const engine = new ActionEngine({
     config,
@@ -58,6 +67,7 @@ export function createEngine(env: NodeJS.ProcessEnv = process.env): { engine: Ac
     fub,
     idx,
     sms,
+    slybroadcast,
     email,
     voice,
     outboundOnly,

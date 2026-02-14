@@ -1,4 +1,6 @@
 import type { OutboundOnlyTransport, OutboundResult, VoiceAdapter } from "@fub/core";
+import fs from "node:fs/promises";
+import path from "node:path";
 
 export class ElevenLabsVoiceAdapter implements VoiceAdapter {
   constructor(private readonly opts: { apiKey: string; baseUrl: string }) {}
@@ -26,6 +28,41 @@ export class ElevenLabsVoiceAdapter implements VoiceAdapter {
       to: message.to
     };
   }
+}
+
+export async function synthesizeSpeechToFile(opts: {
+  apiKey: string;
+  baseUrl: string;
+  voiceId: string;
+  text: string;
+  outputPath: string;
+  modelId?: string;
+}): Promise<{ outputPath: string; bytes: number }> {
+  const response = await fetch(
+    `${opts.baseUrl.replace(/\/$/, "")}/v1/text-to-speech/${encodeURIComponent(opts.voiceId)}`,
+    {
+      method: "POST",
+      headers: {
+        "xi-api-key": opts.apiKey,
+        "Content-Type": "application/json",
+        Accept: "audio/mpeg"
+      },
+      body: JSON.stringify({
+        text: opts.text,
+        model_id: opts.modelId
+      })
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`ElevenLabs TTS failed: ${response.status} ${errorText}`);
+  }
+
+  const audioBuffer = Buffer.from(await response.arrayBuffer());
+  await fs.mkdir(path.dirname(opts.outputPath), { recursive: true });
+  await fs.writeFile(opts.outputPath, audioBuffer);
+  return { outputPath: opts.outputPath, bytes: audioBuffer.byteLength };
 }
 
 export class MockVoiceAdapter implements VoiceAdapter {

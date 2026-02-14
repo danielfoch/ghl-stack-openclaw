@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 import fs from "node:fs";
+import path from "node:path";
 import { Command } from "commander";
 import { extractCommand, type ActionRequest } from "@fub/core";
 import { createEngine, makeRequest } from "./runtime.js";
+import { synthesizeSpeechToFile } from "@fub/adapters-elevenlabs";
 
 const program = new Command();
-const { engine } = createEngine();
+const { engine, config } = createEngine();
 
 program
   .name("fub")
@@ -132,6 +134,80 @@ program
     print(result);
   });
 
+const voicemail = program.command("voicemail").description("Slybroadcast voicemail tools");
+
+voicemail
+  .command("drop")
+  .requiredOption("--to <phones>", "comma-separated phone numbers")
+  .option("--audio-url <url>", "public URL to MP3/WAV file")
+  .option("--sly-audio-name <name>", "existing Slybroadcast recording name")
+  .option("--elevenlabs-text <text>", "generate audio with ElevenLabs and use it")
+  .option("--campaign-name <name>")
+  .option("--caller-id <callerId>")
+  .option("--send-date <YYYY-MM-DD>", "optional schedule date")
+  .option("--send-time <HH:mm>", "optional schedule time")
+  .option("--timezone <tz>", "optional Slybroadcast timezone")
+  .option("--repeat-days <days>", "optional repeat days string, e.g. 135")
+  .option("--confirm", "execute", false)
+  .action(async (opts) => {
+    const numbers = parsePhoneList(opts.to);
+    const audio = await resolveAudioInput({
+      audioUrl: opts.audioUrl,
+      slyAudioName: opts.slyAudioName,
+      elevenlabsText: opts.elevenlabsText
+    });
+    const repeatDays = parseRepeatDays(opts.repeatDays);
+
+    await run({
+      permissionScope: "voicemail:drop",
+      role: "assistant",
+      dryRun: !opts.confirm,
+      confirm: Boolean(opts.confirm),
+      verbose: true,
+      input: {
+        action: "voicemail.drop",
+        phoneNumbers: numbers,
+        audio,
+        campaignName: opts.campaignName,
+        callerId: opts.callerId,
+        sendDate: opts.sendDate,
+        sendTime: opts.sendTime,
+        timezone: opts.timezone,
+        repeatDays
+      }
+    });
+  });
+
+voicemail
+  .command("audio-list")
+  .option("--dry-run", "preview only", false)
+  .action(async (opts) => run({
+      permissionScope: "voicemail:drop",
+      role: "assistant",
+      dryRun: Boolean(opts.dryRun),
+      confirm: !opts.dryRun,
+      verbose: true,
+      input: {
+        action: "voicemail.audio.list"
+      }
+    }));
+
+voicemail
+  .command("campaign-status")
+  .requiredOption("--campaign-id <id>")
+  .option("--dry-run", "preview only", false)
+  .action(async (opts) => run({
+    permissionScope: "voicemail:drop",
+    role: "assistant",
+    dryRun: Boolean(opts.dryRun),
+    confirm: !opts.dryRun,
+    verbose: true,
+    input: {
+      action: "voicemail.campaign.status",
+      campaignId: opts.campaignId
+    }
+  }));
+
 program.parseAsync(process.argv).catch((error) => {
   print({ ok: false, error: (error as Error).message });
   process.exitCode = 1;
@@ -156,4 +232,45 @@ function print(payload: unknown): void {
   } else {
     console.log(JSON.stringify(payload));
   }
+}
+
+function parsePhoneList(value: string): string[] {
+  return value.split(",").map((item) => item.trim()).filter(Boolean);
+}
+
+function parseRepeatDays(value: string | undefined): number[] | undefined {
+  if (!value) return undefined;
+  return value.split("").map((day) => Number(day)).filter((day) => Number.isInteger(day) && day >= 0 && day <= 6);
+}
+
+async function resolveAudioInput(opts: { audioUrl?: string; slyAudioName?: string; elevenlabsText?: string }): Promise<{ audioUrl?: string; slyAudioName?: string }> {
+  if (opts.audioUrl || opts.slyAudioName) {
+    return { audioUrl: opts.audioUrl, slyAudioName: opts.slyAudioName };
+  }
+
+  if (!opts.elevenlabsText) {
+    throw new Error("Provide --audio-url, --sly-audio-name, or --elevenlabs-text");
+  }
+
+  if (!config.ELEVENLABS_API_KEY || !config.ELEVENLABS_TTS_VOICE_ID) {
+    throw new Error("ELEVENLABS_API_KEY and ELEVENLABS_TTS_VOICE_ID are required for --elevenlabs-text");
+  }
+  if (!config.SLYBROADCAST_PUBLIC_AUDIO_BASE_URL) {
+    throw new Error("SLYBROADCAST_PUBLIC_AUDIO_BASE_URL is required for --elevenlabs-text");
+  }
+
+  const filename = `tts-${Date.now()}.mp3`;
+  const outputPath = path.join(config.SLYBROADCAST_AUDIO_STAGING_DIR, filename);
+  await synthesizeSpeechToFile({
+    apiKey: config.ELEVENLABS_API_KEY,
+    baseUrl: config.ELEVENLABS_BASE_URL ?? "https://api.elevenlabs.io",
+    voiceId: config.ELEVENLABS_TTS_VOICE_ID,
+    modelId: config.ELEVENLABS_TTS_MODEL_ID,
+    text: opts.elevenlabsText,
+    outputPath
+  });
+
+  return {
+    audioUrl: `${config.SLYBROADCAST_PUBLIC_AUDIO_BASE_URL.replace(/\/$/, "")}/${filename}`
+  };
 }

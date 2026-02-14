@@ -2,7 +2,7 @@ import type { ActionName, Role } from "../types/actions.js";
 import { PermissionError } from "../errors.js";
 
 const allowlist: Record<Role, ActionName[]> = {
-  readonly: ["person.find", "listing.search", "listing.get", "summary.generate"],
+  readonly: ["person.find", "listing.search", "listing.get", "summary.generate", "voicemail.audio.list", "voicemail.campaign.status"],
   assistant: [
     "person.find",
     "person.upsert",
@@ -13,6 +13,9 @@ const allowlist: Record<Role, ActionName[]> = {
     "task.complete",
     "message.send",
     "message.logToFUB",
+    "voicemail.drop",
+    "voicemail.audio.list",
+    "voicemail.campaign.status",
     "listing.search",
     "listing.get",
     "summary.generate"
@@ -25,6 +28,9 @@ const allowlist: Record<Role, ActionName[]> = {
     "task.complete",
     "message.send",
     "message.logToFUB",
+    "voicemail.drop",
+    "voicemail.audio.list",
+    "voicemail.campaign.status",
     "listing.search",
     "listing.get",
     "summary.generate"
@@ -39,6 +45,9 @@ const allowlist: Record<Role, ActionName[]> = {
     "task.complete",
     "message.send",
     "message.logToFUB",
+    "voicemail.drop",
+    "voicemail.audio.list",
+    "voicemail.campaign.status",
     "listing.search",
     "listing.get",
     "summary.generate"

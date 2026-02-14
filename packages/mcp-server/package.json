@@ -17,6 +17,7 @@
     "@fub/adapters-sendhub": "0.1.0",
     "@fub/adapters-email": "0.1.0",
     "@fub/adapters-elevenlabs": "0.1.0",
-    "@modelcontextprotocol/sdk": "^1.13.0"
+    "@modelcontextprotocol/sdk": "^1.13.0",
+    "@fub/adapters-slybroadcast": "0.1.0"
   }
 }

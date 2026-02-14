@@ -47,7 +47,17 @@ export const appConfigSchema = z.object({
   GOG_CLI_PATH: z.string().default("gog"),
 
   ELEVENLABS_API_KEY: z.string().optional(),
-  ELEVENLABS_BASE_URL: z.string().url().optional()
+  ELEVENLABS_BASE_URL: z.string().url().optional(),
+  ELEVENLABS_TTS_VOICE_ID: z.string().optional(),
+  ELEVENLABS_TTS_MODEL_ID: z.string().optional(),
+
+  APP_ENABLE_SLYBROADCAST: boolish.default("false"),
+  SLYBROADCAST_BASE_URL: z.string().url().default("https://www.slybroadcast.com/gateway/v4"),
+  SLYBROADCAST_EMAIL: z.string().optional(),
+  SLYBROADCAST_PASSWORD: z.string().optional(),
+  SLYBROADCAST_DEFAULT_CALLER_ID: z.string().optional(),
+  SLYBROADCAST_PUBLIC_AUDIO_BASE_URL: z.string().url().optional(),
+  SLYBROADCAST_AUDIO_STAGING_DIR: z.string().default("./tmp/slybroadcast-audio")
 });
 
 export type AppConfig = z.infer<typeof appConfigSchema>;
