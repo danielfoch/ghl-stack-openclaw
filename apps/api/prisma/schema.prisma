@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum World {
+  DECENTRALAND
+}
+
+enum Currency {
+  ETH
+  MANA
+}
+
+enum ListingStatus {
+  ACTIVE
+  CANCELLED
+  SOLD
+  EXPIRED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+model Agent {
+  id            String     @id @default(uuid())
+  walletAddress String     @unique
+  displayName   String?
+  bio           String?
+  isAdmin       Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  sessions      Session[]
+  listings      Listing[]  @relation("SellerListings")
+  offers        Offer[]    @relation("BuyerOffers")
+  auditLogs     AuditLog[] @relation("ActorAuditLogs")
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  agentId   String
+  nonce     String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  agent     Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+}
+
+model Listing {
+  id            String        @id @default(uuid())
+  world         World
+  parcelId      String
+  x             Int
+  y             Int
+  sellerAgentId String
+  priceWei      String
+  currency      Currency
+  status        ListingStatus @default(ACTIVE)
+  description   String?
+  tags          String[]
+  expiresAt     DateTime
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  seller        Agent         @relation("SellerListings", fields: [sellerAgentId], references: [id], onDelete: Cascade)
+  offers        Offer[]
+  txs           Transaction[]
+
+  @@index([world, x, y])
+  @@index([status])
+}
+
+model Offer {
+  id            String      @id @default(uuid())
+  listingId     String
+  buyerAgentId  String
+  offerPriceWei String
+  status        OfferStatus @default(PENDING)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  listing       Listing     @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer         Agent       @relation("BuyerOffers", fields: [buyerAgentId], references: [id], onDelete: Cascade)
+  txs           Transaction[]
+}
+
+model Transaction {
+  id            String            @id @default(uuid())
+  offerId       String?
+  listingId     String?
+  escrowAddress String
+  txHash        String
+  chainId       Int
+  status        TransactionStatus @default(PENDING)
+  createdAt     DateTime          @default(now())
+  offer         Offer?            @relation(fields: [offerId], references: [id], onDelete: SetNull)
+  listing       Listing?          @relation(fields: [listingId], references: [id], onDelete: SetNull)
+
+  @@unique([txHash, chainId])
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  actorAgentId String?
+  action       String
+  entityType   String
+  entityId     String
+  diffJson     Json
+  createdAt    DateTime @default(now())
+  actor        Agent?   @relation("ActorAuditLogs", fields: [actorAgentId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+}
+
+model AuthNonce {
+  id        String   @id @default(uuid())
+  wallet    String
+  nonce     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([wallet])
+}
+
+model ActionNonce {
+  id        String   @id @default(uuid())
+  agentId   String
+  nonce     String   @unique
+  action    String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+model ParcelCache {
+  id           String   @id @default(uuid())
+  world        World
+  parcelId     String   @unique
+  x            Int
+  y            Int
+  ownerAddress String?
+  name         String?
+  description  String?
+  image        String?
+  rawJson      Json
+  updatedAt    DateTime @updatedAt
+}
+
+model AppConfig {
+  id                String   @id @default("singleton")
+  humanReadonlyMode Boolean  @default(false)
+  updatedAt         DateTime @updatedAt
+}

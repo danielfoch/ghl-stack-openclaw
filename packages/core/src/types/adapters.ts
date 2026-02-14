@@ -41,6 +41,7 @@ export type OutboundResult = {
 
 export interface FubAdapter {
   searchPeople(query: string): Promise<FubPerson[]>;
+  getPersonById(id: number): Promise<FubPerson | null>;
   findPersonByExternalRef(ref: { email?: string; phone?: string; name?: string }): Promise<FubPerson | null>;
   upsertPerson(input: Partial<FubPerson> & { email?: string; phone?: string; name?: string }): Promise<FubPerson>;
   addTag(personId: number, tag: string): Promise<void>;
