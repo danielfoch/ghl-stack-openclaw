@@ -43,6 +43,10 @@ export function createApp() {
   app.use(attachAgent);
 
   const csrfProtection = csurf({ cookie: { httpOnly: true, sameSite: "lax", secure: config.nodeEnv === "production" } });
+  const csrfIfNeeded: express.RequestHandler = (req, res, next) => {
+    if (req.authMethod === "api_key") return next();
+    return csrfProtection(req, res, next);
+  };
 
   app.get("/health", (_req, res) => res.json({ ok: true }));
   app.get("/security/csrf", csrfProtection, (req, res) => res.json({ csrfToken: req.csrfToken?.() }));
@@ -50,10 +54,10 @@ export function createApp() {
   app.use("/auth", authRouter);
   app.use(botOnlyGate);
 
-  app.use("/listings", csrfProtection, listingsRouter);
-  app.use("/admin", csrfProtection, adminRouter);
-  app.use("/parcels", csrfProtection, parcelsRouter);
-  app.use("/realtors", csrfProtection, realtorRouter);
+  app.use("/listings", csrfIfNeeded, listingsRouter);
+  app.use("/admin", csrfIfNeeded, adminRouter);
+  app.use("/parcels", csrfIfNeeded, parcelsRouter);
+  app.use("/realtors", csrfIfNeeded, realtorRouter);
 
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     if (err.code === "EBADCSRFTOKEN") {

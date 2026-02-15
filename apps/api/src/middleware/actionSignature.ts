@@ -4,6 +4,10 @@ import { buildActionMessage, verifySignature } from "../security/siwe";
 
 export function requireActionSignature(actionName: string) {
   return async (req: Request, res: Response, next: NextFunction) => {
+    if (req.authMethod === "api_key") {
+      return next();
+    }
+
     if (!req.agent) {
       return res.status(401).json({ error: "Agent auth required" });
     }

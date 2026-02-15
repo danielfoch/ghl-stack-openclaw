@@ -24,4 +24,6 @@ export const config = {
   rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000),
   chainId: Number(process.env.CHAIN_ID || 11155111),
   escrowContractAddress: process.env.ESCROW_CONTRACT_ADDRESS || "",
+  openclawApiKey: process.env.OPENCLAW_API_KEY || "",
+  openclawApiAgentWallet: (process.env.OPENCLAW_API_AGENT_WALLET || "").toLowerCase(),
 };
