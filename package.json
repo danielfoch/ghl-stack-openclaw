@@ -16,8 +16,11 @@
     "dev:kvcore-mcp": "npm --workspace @fub/kvcore-mcp-server run dev",
     "dev:webhooks": "npm --workspace @fub/webhooks run dev",
     "build:skyslope": "npm --workspace @fub/skyslope-deal-manager run build",
+    "build:slybroadcast-voicemail": "npm --workspace @fub/slybroadcast-voicemail run build",
     "dev:skyslope-cli": "npm --workspace @fub/skyslope-deal-manager run dev:cli --",
     "dev:skyslope-mcp": "npm --workspace @fub/skyslope-deal-manager run dev:mcp",
+    "dev:slybroadcast-cli": "npm --workspace @fub/slybroadcast-voicemail run dev:cli --",
+    "dev:slybroadcast-mcp": "npm --workspace @fub/slybroadcast-voicemail run dev:mcp",
     "test": "npm --workspace @fub/core run test",
     "lint": "npm run build",
     "demo": "tsx scripts/demo.ts"

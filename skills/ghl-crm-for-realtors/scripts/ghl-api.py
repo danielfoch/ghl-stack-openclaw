@@ -329,6 +329,21 @@ def send_message(contact_id, message, msg_type="SMS"):
     return _post("/conversations/messages", body)
 
 
+def send_email(contact_id, subject, html_message, email_from=None):
+    """Send an email message to a contact via GHL conversations API."""
+    _validate_id(contact_id, "contact_id")
+    body = {
+        "type": "Email",
+        "contactId": contact_id,
+        "subject": subject,
+        "message": html_message,
+    }
+    sender = email_from or os.environ.get("HIGHLEVEL_EMAIL_FROM", "").strip()
+    if sender:
+        body["emailFrom"] = sender
+    return _post("/conversations/messages", body)
+
+
 # ──────────────────────────────────────────────
 # Calendars & Appointments
 # ──────────────────────────────────────────────
@@ -649,6 +664,12 @@ COMMANDS = {
     "list_conversations": lambda: list_conversations(),
     "get_conversation": lambda: get_conversation(sys.argv[2]),
     "send_message": lambda: send_message(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "SMS"),
+    "send_email": lambda: send_email(
+        sys.argv[2],
+        sys.argv[3],
+        sys.argv[4],
+        sys.argv[5] if len(sys.argv) > 5 else None,
+    ),
     "list_calendars": lambda: list_calendars(),
     "get_free_slots": lambda: get_free_slots(sys.argv[2], sys.argv[3], sys.argv[4]),
     "create_appointment": lambda: create_appointment(sys.argv[2], sys.argv[3]),

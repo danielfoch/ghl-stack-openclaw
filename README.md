@@ -17,6 +17,7 @@ MVP-to-production monorepo for hands-free realtor CRM operations using Follow Up
 - `packages/kvcore-mcp-server`: MCP server for KVcore contact/calls/email/text operations.
 - `packages/kvcore-cli`: KVcore CLI for direct CRM operations.
 - `packages/webhooks`: inbound instruction gateway (email/SMS/voice).
+- `packages/slybroadcast-voicemail`: standalone Slybroadcast voicemail CLI + MCP server with ElevenLabs voice plugin support.
 - `scripts/demo.ts`: end-to-end mock demo for required workflows.
 
 ## Security Design
@@ -215,3 +216,13 @@ A new package is available at `packages/skyslope-deal-manager` for transaction/d
 - Build package: `npm run build:skyslope`
 
 See `packages/skyslope-deal-manager/README.md` for commands and env variables.
+
+## Slybroadcast Voicemail (New)
+
+Package at `packages/slybroadcast-voicemail`:
+
+- CLI runtime: `npm run dev:slybroadcast-cli -- <command>`
+- MCP runtime: `npm run dev:slybroadcast-mcp`
+- Build package: `npm run build:slybroadcast-voicemail`
+
+See `packages/slybroadcast-voicemail/README.md` for commands and env variables.

@@ -17,6 +17,7 @@ Set these variables before running the scripts:
 Optional runtime variables:
 
 - `PYTHONUNBUFFERED=1`
+- `HIGHLEVEL_EMAIL_FROM` (default sender for `send_email`)
 
 ## Setup
 
@@ -47,6 +48,7 @@ Common commands for realtor workflows:
 - `list_pipelines`
 - `list_conversations`
 - `send_message [contact_id] [message]`
+- `send_email [contact_id] [subject] [html_message] [email_from_optional]`
 - `list_calendars`
 - `get_free_slots [calendar_id] [start_date] [end_date]`
 - `list_workflows`
