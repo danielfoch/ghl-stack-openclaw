@@ -1,0 +1,4 @@
+interface:
+  display_name: "YouTube to Substack"
+  short_description: "Convert fresh YouTube uploads into Substack drafts."
+  default_prompt: "Monitor a YouTube channel for a new upload, transcribe it, and draft a short danielfoch.substack.com post with a strong headline, verified YouTube embed, and hold-in-draft notification if embed checks fail."
