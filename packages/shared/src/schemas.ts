@@ -43,3 +43,33 @@ export const adminAgentSchema = z.object({
   bio: z.string().max(400).optional(),
   isAdmin: z.boolean().default(false),
 });
+
+export const ugcSubscribeSchema = z.object({
+  email: z.string().email().optional(),
+  autoApprove: z.boolean().optional(),
+  pricePerVideoUsd: z.number().int().min(1).max(5000).optional(),
+});
+
+export const createConceptSchema = z.object({
+  title: z.string().min(4).max(120),
+  summary: z.string().min(10).max(500),
+  script: z.string().min(20).max(20000),
+  chartData: z.record(z.any()).optional(),
+  sourceNotes: z.string().max(5000).optional(),
+});
+
+export const respondToConceptSchema = z.object({
+  decision: z.enum(["APPROVE", "DECLINE"]),
+});
+
+export const diyListingTourSchema = z.object({
+  photoUrls: z.array(z.string().url()).min(1).max(20),
+  script: z.string().min(10).max(5000),
+  provider: z.enum(["KLING", "SEEDANCE"]).optional(),
+});
+
+export const diyTakeExplainerSchema = z.object({
+  take: z.string().min(10).max(2000),
+  context: z.string().max(3000).optional(),
+  provider: z.enum(["KLING", "SEEDANCE", "HEYGEN"]).optional(),
+});

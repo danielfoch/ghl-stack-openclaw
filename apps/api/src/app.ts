@@ -11,6 +11,7 @@ import { listingsRouter } from "./routes/listings";
 import { adminRouter } from "./routes/admin";
 import { parcelsRouter } from "./routes/parcels";
 import { realtorRouter } from "./routes/realtors";
+import { ugcRouter } from "./routes/ugc";
 
 export function createApp() {
   const app = express();
@@ -58,6 +59,7 @@ export function createApp() {
   app.use("/admin", csrfIfNeeded, adminRouter);
   app.use("/parcels", csrfIfNeeded, parcelsRouter);
   app.use("/realtors", csrfIfNeeded, realtorRouter);
+  app.use("/ugc", csrfIfNeeded, ugcRouter);
 
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     if (err.code === "EBADCSRFTOKEN") {

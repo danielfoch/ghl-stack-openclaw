@@ -47,6 +47,9 @@ model Agent {
   listings      Listing[]  @relation("SellerListings")
   offers        Offer[]    @relation("BuyerOffers")
   auditLogs     AuditLog[] @relation("ActorAuditLogs")
+  createdConcepts ContentConcept[]
+  ugcSubscription UgcSubscriber?
+  requestedVideoJobs VideoJob[]
 }
 
 model Session {
@@ -154,6 +157,141 @@ model ParcelCache {
   image        String?
   rawJson      Json
   updatedAt    DateTime @updatedAt
+}
+
+enum ConceptStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum SubscriberStatus {
+  ACTIVE
+  PAUSED
+  CANCELED
+}
+
+enum NotificationStatus {
+  PENDING
+  APPROVED
+  DECLINED
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum BillingProvider {
+  MOCK
+  STRIPE
+}
+
+enum ChargeStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
+enum VideoProvider {
+  MOCK
+  KLING
+  SEEDANCE
+  HEYGEN
+}
+
+enum VideoJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum VideoUseCase {
+  LISTING_TOUR
+  TAKE_EXPLAINER
+  AVATAR_REPURPOSE
+}
+
+model UgcSubscriber {
+  id              String                @id @default(uuid())
+  agentId          String                @unique
+  email            String?
+  status           SubscriberStatus      @default(ACTIVE)
+  autoApprove      Boolean               @default(false)
+  pricePerVideoUsd Int                   @default(49)
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  agent            Agent                 @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  notifications    ConceptNotification[]
+}
+
+model ContentConcept {
+  id                String                @id @default(uuid())
+  title             String
+  summary           String
+  script            String
+  chartData         Json?
+  sourceNotes       String?
+  status            ConceptStatus         @default(DRAFT)
+  createdByAgentId  String
+  createdAt         DateTime              @default(now())
+  publishedAt       DateTime?
+  createdBy         Agent                 @relation(fields: [createdByAgentId], references: [id], onDelete: Cascade)
+  notifications     ConceptNotification[]
+
+  @@index([status, createdAt])
+}
+
+model ConceptNotification {
+  id             String             @id @default(uuid())
+  conceptId      String
+  subscriberId   String
+  status         NotificationStatus @default(PENDING)
+  summary        String
+  createdAt      DateTime           @default(now())
+  approvedAt     DateTime?
+  declinedAt     DateTime?
+  completedAt    DateTime?
+  concept        ContentConcept     @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+  subscriber     UgcSubscriber      @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  charge         BillingCharge?
+  videoJob       VideoJob?
+
+  @@unique([conceptId, subscriberId])
+  @@index([subscriberId, status, createdAt])
+}
+
+model BillingCharge {
+  id              String              @id @default(uuid())
+  notificationId  String              @unique
+  provider        BillingProvider
+  status          ChargeStatus        @default(PENDING)
+  amountUsd       Int
+  currency        String              @default("USD")
+  externalRef     String?
+  errorMessage    String?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  notification    ConceptNotification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+}
+
+model VideoJob {
+  id               String               @id @default(uuid())
+  notificationId   String?              @unique
+  requesterAgentId String
+  useCase          VideoUseCase
+  provider         VideoProvider
+  status           VideoJobStatus       @default(QUEUED)
+  inputJson        Json
+  outputUrl        String?
+  externalJobId    String?
+  errorMessage     String?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  completedAt      DateTime?
+  notification     ConceptNotification? @relation(fields: [notificationId], references: [id], onDelete: SetNull)
+  requester        Agent                @relation(fields: [requesterAgentId], references: [id], onDelete: Cascade)
+
+  @@index([requesterAgentId, createdAt])
 }
 
 model AppConfig {
