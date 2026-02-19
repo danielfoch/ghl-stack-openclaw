@@ -1,0 +1,4 @@
+interface:
+  display_name: "Filogix Expert API"
+  short_description: "Operate Filogix Expert through API workflows"
+  default_prompt: "Use $filogix-expert-api to execute Filogix Expert tasks through authenticated API calls."

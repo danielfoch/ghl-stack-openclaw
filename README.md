@@ -226,3 +226,13 @@ Package at `packages/slybroadcast-voicemail`:
 - Build package: `npm run build:slybroadcast-voicemail`
 
 See `packages/slybroadcast-voicemail/README.md` for commands and env variables.
+
+## Realtor OpenClaw Bridge (New)
+
+Package at `packages/realtor-openclaw-bridge`:
+
+- CLI runtime: `npm run dev:openclaw-bridge-cli -- <command>`
+- MCP runtime: `npm run dev:openclaw-bridge-mcp`
+- Build package: `npm run build:openclaw-bridge`
+
+See `packages/realtor-openclaw-bridge/README.md` for commands and env variables.
