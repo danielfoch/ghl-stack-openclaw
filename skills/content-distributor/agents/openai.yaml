@@ -1,0 +1,4 @@
+interface:
+  display_name: "Content Distributor"
+  short_description: "Fan-out one image post across major social channels."
+  default_prompt: "Take this screenshot/image and caption, create platform-safe variants, and distribute to LinkedIn, Threads, Facebook, Instagram, YouTube, Substack Notes, and TikTok through configured webhooks with delivery audit output."
