@@ -1,0 +1,28 @@
+{
+  "name": "@fub/crea-ddf-mcp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "crea-ddf": "dist/cli.js",
+    "crea-ddf-mcp": "dist/mcp-server.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev:cli": "tsx src/cli.ts",
+    "dev:mcp": "tsx src/mcp-server.ts",
+    "test": "node --loader tsx --test \"src/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.4",
+    "commander": "^12.1.0",
+    "undici": "^7.16.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "typescript": "^5.7.3"
+  }
+}

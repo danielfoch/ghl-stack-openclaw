@@ -1,0 +1,4 @@
+<Get xmlns="http://tempuri.org/">
+  <Username>SUPPLIER01</Username>
+  <Password>REPLACE_ME</Password>
+</Get>

@@ -1,0 +1,4 @@
+agent:
+  display_name: "YouTube Comment Responder"
+  short_description: "List and reply to YouTube comments via CLI"
+  default_prompt: "Use youtube-comment-responder to fetch top-level comments for a video and send safe, concise replies with dry-run preview first."

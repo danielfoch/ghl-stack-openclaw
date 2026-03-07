@@ -10,7 +10,7 @@ Base URL: https://services.leadconnectorhq.com
 All requests include: Authorization: Bearer <token>, Version: 2021-07-28
 """
 
-import json, os, re, sys, time, urllib.request, urllib.error, urllib.parse
+import difflib, json, os, re, sys, time, urllib.request, urllib.error, urllib.parse
 
 BASE = "https://services.leadconnectorhq.com"
 VERSION = "2021-07-28"
@@ -707,15 +707,65 @@ COMMANDS = {
     "get_snapshot_status": lambda: get_snapshot_status(sys.argv[2]),
 }
 
+ALIASES = {
+    "list_contacts": "list_all_contacts",
+    "contacts": "list_all_contacts",
+    "find_contact": "search_contacts",
+    "connection_test": "test_connection",
+}
+
+
+def _usage(exit_code=0):
+    command_list = ", ".join(sorted(COMMANDS.keys()))
+    print("Usage: python3 ghl-api.py <command> [args...]", file=sys.stderr if exit_code else sys.stdout)
+    print("", file=sys.stderr if exit_code else sys.stdout)
+    print(f"Commands: {command_list}", file=sys.stderr if exit_code else sys.stdout)
+    if ALIASES:
+        alias_list = ", ".join(f"{k}->{v}" for k, v in sorted(ALIASES.items()))
+        print(f"Aliases: {alias_list}", file=sys.stderr if exit_code else sys.stdout)
+    sys.exit(exit_code)
+
+
+def _resolve_command(name):
+    normalized = ALIASES.get(name, name)
+    if normalized in COMMANDS:
+        return normalized
+    known = list(COMMANDS.keys()) + list(ALIASES.keys())
+    hint = difflib.get_close_matches(name, known, n=1)
+    msg = f"Unknown command '{name}'."
+    if hint:
+        suggested = ALIASES.get(hint[0], hint[0])
+        msg += f" Did you mean '{suggested}'?"
+    raise ValueError(msg)
+
+
+def _ensure_creds_for_command(command):
+    # Keep --help and typo handling usable without env vars.
+    if command is None:
+        return
+    if not TOKEN:
+        raise ValueError("HIGHLEVEL_TOKEN not set. Export HIGHLEVEL_TOKEN before running commands.")
+    if not LOC_ID:
+        raise ValueError("HIGHLEVEL_LOCATION_ID not set. Export HIGHLEVEL_LOCATION_ID before running commands.")
+
+
 if __name__ == "__main__":
-    if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
-        print(f"Commands: {', '.join(sorted(COMMANDS.keys()))}")
-        sys.exit(1)
+    if len(sys.argv) < 2 or sys.argv[1] in {"-h", "--help", "help"}:
+        _usage(0 if len(sys.argv) >= 2 else 1)
     try:
-        _out(COMMANDS[sys.argv[1]]())
+        resolved = _resolve_command(sys.argv[1])
+        _ensure_creds_for_command(resolved)
+        if resolved != sys.argv[1]:
+            sys.argv[1] = resolved
+        _out(COMMANDS[resolved]())
     except ValueError as e:
         _out({"error": "validation_failed", "message": str(e)})
         sys.exit(1)
     except IndexError:
-        _out({"error": "missing_argument", "message": f"Command '{sys.argv[1]}' requires additional arguments."})
+        _out(
+            {
+                "error": "missing_argument",
+                "message": f"Command '{sys.argv[1]}' requires additional arguments. Run '--help' for command list.",
+            }
+        )
         sys.exit(1)
