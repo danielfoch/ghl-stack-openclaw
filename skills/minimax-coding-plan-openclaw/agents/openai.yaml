@@ -1,0 +1,4 @@
+interface:
+  display_name: "MiniMax Coding Plan (OpenClaw)"
+  short_description: "Wire OpenClaw to MiniMax M2.5 Coding Plan with tool-safe routing."
+  default_prompt: "Use $minimax-coding-plan-openclaw to configure OpenClaw for MiniMax M2.5 Coding Plan (not standard API routing), validate tool-calling jobs, and resolve 1008 balance or missing tool-call/call_id failures."
